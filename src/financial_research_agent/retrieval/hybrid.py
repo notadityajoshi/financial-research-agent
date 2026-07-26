@@ -3,7 +3,7 @@
 from financial_research_agent.logging_config import get_logger
 from financial_research_agent.retrieval.bm25_index import BM25Index
 from financial_research_agent.retrieval.vector_store import SearchResult, VectorStore
-
+from financial_research_agent.retrieval.reranker import Reranker
 log = get_logger(__name__)
 
 RRF_K = 60  # standard damping constant from the RRF paper
@@ -12,9 +12,15 @@ RRF_K = 60  # standard damping constant from the RRF paper
 class HybridRetriever:
     """Fuses semantic (dense) and lexical (BM25) rankings via RRF."""
 
-    def __init__(self, vector_store: VectorStore, bm25: BM25Index) -> None:
+    def __init__(
+        self,
+        vector_store: VectorStore,
+        bm25: BM25Index,
+        reranker: Reranker | None = None,
+    ) -> None:
         self._vector_store = vector_store
         self._bm25 = bm25
+        self._reranker = reranker
 
     @staticmethod
     def _fuse(
@@ -40,15 +46,20 @@ class HybridRetriever:
     async def search(
         self, query: str, *, limit: int = 5, pool: int = 20
     ) -> list[SearchResult]:
-        """Hybrid search: fetch `pool` candidates per method, fuse, return top `limit`."""
+        """Hybrid search; if a reranker is set, RRF selects candidates and
+        the cross-encoder picks the final top `limit`."""
         dense = await self._vector_store.search(query, limit=pool)
         lexical = self._bm25.search(query, limit=pool)
-        fused = self._fuse([dense, lexical], limit)
+        fuse_limit = pool if self._reranker else limit
+        fused = self._fuse([dense, lexical], fuse_limit)
+        if self._reranker:
+            fused = self._reranker.rerank(query, fused, limit=limit)
         log.info(
             "hybrid_search",
             query=query[:60],
             dense=len(dense),
             lexical=len(lexical),
             fused=len(fused),
+            reranked=self._reranker is not None,
         )
         return fused
