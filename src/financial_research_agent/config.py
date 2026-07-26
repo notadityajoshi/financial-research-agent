@@ -36,6 +36,8 @@ class Settings(BaseSettings):
     qdrant_path: str = "data/qdrant"
     # Reranking
     rerank_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    # Database
+    database_url: str = "postgresql+asyncpg://localhost/finagent"
 @lru_cache
 def get_settings() -> Settings:
     """Return a cached Settings instance (loaded once per process)."""
