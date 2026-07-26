@@ -5,6 +5,19 @@ from financial_research_agent.agents.state import ResearchState
 from financial_research_agent.integrations.financial_data import FinancialFact
 from financial_research_agent.integrations.news import NewsArticle
 from financial_research_agent.integrations.sec_edgar import Filing
+import json
+
+from financial_research_agent.llm.base import LLMResponse
+
+
+class _NoopLLM:
+    async def complete(self, messages, *, temperature: float = 0.0):
+        return LLMResponse(
+            content=json.dumps({"items": []}),
+            model="fake",
+            input_tokens=0,
+            output_tokens=0,
+        )
 
 FACT = FinancialFact(
     metric="revenue",
@@ -47,7 +60,7 @@ class FakeNews:
 
 
 async def test_happy_path_populates_state() -> None:
-    graph = build_research_graph(FakeSEC(), FakeFinancial(), FakeNews())
+    graph = build_research_graph(FakeSEC(), FakeFinancial(), FakeNews(), _NoopLLM())
     result = ResearchState(**await graph.ainvoke(ResearchState(ticker="NVDA")))
     assert result.filings and result.news
     assert result.metrics is not None
@@ -56,7 +69,7 @@ async def test_happy_path_populates_state() -> None:
 
 
 async def test_fault_isolation_keeps_graph_alive() -> None:
-    graph = build_research_graph(FakeSEC(), FailingFinancial(), FakeNews())
+    graph = build_research_graph(FakeSEC(), FailingFinancial(), FakeNews(), _NoopLLM())
     result = ResearchState(**await graph.ainvoke(ResearchState(ticker="NVDA")))
     assert result.filings and result.news  # healthy branches unaffected
     assert result.metrics is None

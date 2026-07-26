@@ -1,6 +1,7 @@
 """Graph nodes: thin, fault-isolated wrappers over existing components."""
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable
+from typing import Protocol
 
 from financial_research_agent.agents.state import NodeError, ResearchState
 from financial_research_agent.core.metrics import compute_metrics
@@ -11,7 +12,11 @@ from financial_research_agent.logging_config import get_logger
 
 log = get_logger(__name__)
 
-Node = Callable[[ResearchState], Awaitable[dict]]
+
+class Node(Protocol):
+    """An async graph node: takes state, returns a partial state update."""
+
+    def __call__(self, state: ResearchState) -> Awaitable[dict]: ...
 
 
 def fault_isolated(name: str, node: Node) -> Node:
