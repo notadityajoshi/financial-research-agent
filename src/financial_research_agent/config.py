@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     debug: bool = True
     log_level: str = "INFO"
 
+    # LLM
+    llm_provider: Literal["ollama", "openai"] = "ollama"
+    llm_model: str = "llama3.2:3b"
+    ollama_base_url: str = "http://localhost:11434/v1"
+    openai_api_key: str = ""
 
 @lru_cache
 def get_settings() -> Settings:
