@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     rerank_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     # Database
     database_url: str = "postgresql+asyncpg://localhost/finagent"
+    # RAG
+    max_index_chunks: int = 120
 @lru_cache
 def get_settings() -> Settings:
     """Return a cached Settings instance (loaded once per process)."""

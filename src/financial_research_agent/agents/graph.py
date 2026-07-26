@@ -12,11 +12,14 @@ from financial_research_agent.agents.nodes import (
     make_fetch_filings,
     make_fetch_news,
 )
+from financial_research_agent.agents.rag import make_filing_analyst, make_index_filing
 from financial_research_agent.agents.state import ResearchState
 from financial_research_agent.integrations.financial_data import FinancialDataClient
 from financial_research_agent.integrations.news import NewsClient
 from financial_research_agent.integrations.sec_edgar import SECEdgarClient
 from financial_research_agent.llm.base import LLMClient
+from financial_research_agent.retrieval.reranker import Reranker
+from financial_research_agent.retrieval.vector_store import VectorStore
 
 
 def build_research_graph(
@@ -24,8 +27,10 @@ def build_research_graph(
     financial: FinancialDataClient,
     news: NewsClient,
     llm: LLMClient,
+    store: VectorStore | None = None,
+    reranker: Reranker | None = None,
 ):
-    """START → parallel fetch → metrics → parallel analysts → END."""
+    """START → parallel fetch → metrics → parallel analysts (+ optional RAG branch) → END."""
     graph = StateGraph(ResearchState)
 
     graph.add_node("fetch_filings", make_fetch_filings(sec))
@@ -41,5 +46,12 @@ def build_research_graph(
     for analyst in ("analyze_risks", "analyze_opportunities"):
         graph.add_edge("compute_metrics", analyst)
         graph.add_edge(analyst, END)
+
+    if store is not None:
+        graph.add_node("index_filing", make_index_filing(sec, store))
+        graph.add_node("analyze_filing", make_filing_analyst(store, llm, reranker))
+        graph.add_edge("fetch_filings", "index_filing")
+        graph.add_edge("index_filing", "analyze_filing")
+        graph.add_edge("analyze_filing", END)
 
     return graph.compile()

@@ -27,3 +27,39 @@ class OpportunityAnalysis(BaseModel):
     items: list[AnalysisItem] = Field(
         description="Three to five distinct opportunities"
     )
+
+
+class DraftGroundedItem(BaseModel):
+    """LLM draft insight citing numbered evidence excerpts."""
+
+    title: str = Field(description="Short headline, under 12 words")
+    detail: str = Field(description="Two to three sentence explanation")
+    severity: Severity = Field(description="Materiality to the investment case")
+    source_ids: list[int] = Field(
+        description="Numbers of the excerpts that support this item"
+    )
+
+
+class FilingAnalysis(BaseModel):
+    """Filing analyst draft output."""
+
+    items: list[DraftGroundedItem] = Field(
+        description="Three to five insights, each citing excerpts"
+    )
+
+
+class EvidenceRef(BaseModel):
+    """Resolved citation: the actual excerpt and its provenance."""
+
+    excerpt: str
+    form_type: str
+    filing_date: str
+
+
+class GroundedInsight(BaseModel):
+    """Final insight with verifiable evidence attached."""
+
+    title: str
+    detail: str
+    severity: Severity
+    evidence: list[EvidenceRef]
