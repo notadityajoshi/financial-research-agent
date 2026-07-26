@@ -27,6 +27,13 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     # SEC EDGAR
     sec_user_agent: str = ""
+    # Embeddings
+    embedding_provider: Literal["ollama", "openai"] = "ollama"
+    embedding_model: str = "nomic-embed-text"
+    embedding_dim: int = 768
+
+    # Vector store
+    qdrant_path: str = "data/qdrant"
 @lru_cache
 def get_settings() -> Settings:
     """Return a cached Settings instance (loaded once per process)."""
