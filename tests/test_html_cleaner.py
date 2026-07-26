@@ -1,38 +1,42 @@
-"""Convert SEC filing HTML into clean plain text for chunking and RAG."""
+"""Offline unit tests for filing HTML cleaning."""
 
-import re
+from financial_research_agent.ingestion.html_cleaner import html_to_text
 
-from bs4 import BeautifulSoup
-
-from financial_research_agent.logging_config import get_logger
-
-log = get_logger(__name__)
-
-# Tags whose content is never useful prose.
-_NOISE_TAGS = ("script", "style", "ix:header")
-
-_MULTISPACE = re.compile(r"[ \t]+")
-_MULTINEWLINE = re.compile(r"\n{3,}")
+SAMPLE = """
+<html><head><style>p { color: red; }</style>
+<script>alert('x');</script></head>
+<body>
+<ix:header><ix:hidden>meta-noise</ix:hidden></ix:header>
+<p>Item 1A.   Risk\tFactors</p>
 
 
-def html_to_text(html: str) -> str:
-    """Return clean plain text from filing HTML.
+<p>Demand for our products may&nbsp;decline.</p>
+</body></html>
+"""
 
-    Removes scripts, styles and hidden XBRL metadata; preserves
-    paragraph breaks; collapses runs of whitespace.
-    """
-    soup = BeautifulSoup(html, "lxml")
 
-    for tag in soup.find_all(_NOISE_TAGS):
-        tag.decompose()
+def test_noise_tags_removed() -> None:
+    text = html_to_text(SAMPLE)
+    assert "alert" not in text
+    assert "color" not in text
+    assert "meta-noise" not in text
 
-    text = soup.get_text(separator="\n")
 
-    text = text.replace("\xa0", " ")
-    text = _MULTISPACE.sub(" ", text)
-    lines = (line.strip() for line in text.splitlines())
-    text = "\n".join(line for line in lines if line)
-    text = _MULTINEWLINE.sub("\n\n", text)
+def test_prose_preserved() -> None:
+    text = html_to_text(SAMPLE)
+    assert "Risk Factors" in text
+    assert "Demand for our products" in text
 
-    log.info("html_cleaned", input_chars=len(html), output_chars=len(text))
-    return text
+
+def test_whitespace_collapsed() -> None:
+    text = html_to_text(SAMPLE)
+    assert "  " not in text
+    assert "\n\n\n" not in text
+
+
+def test_entities_decoded() -> None:
+    assert "may decline" in html_to_text(SAMPLE)
+
+
+def test_empty_input() -> None:
+    assert html_to_text("") == ""
