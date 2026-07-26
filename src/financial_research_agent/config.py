@@ -25,7 +25,8 @@ class Settings(BaseSettings):
     llm_model: str = "llama3.2:3b"
     ollama_base_url: str = "http://localhost:11434/v1"
     openai_api_key: str = ""
-
+    # SEC EDGAR
+    sec_user_agent: str = ""
 @lru_cache
 def get_settings() -> Settings:
     """Return a cached Settings instance (loaded once per process)."""

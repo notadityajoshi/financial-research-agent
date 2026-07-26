@@ -1,6 +1,10 @@
 """LLM client for any OpenAI-compatible API (Ollama, OpenAI)."""
 
 from openai import AsyncOpenAI
+from typing import cast
+
+from openai import AsyncOpenAI
+from openai.types.chat import ChatCompletionMessageParam
 
 from financial_research_agent.llm.base import ChatMessage, LLMResponse
 from financial_research_agent.logging_config import get_logger
@@ -21,7 +25,10 @@ class OpenAICompatibleClient:
         """Generate a completion; normalise the provider response."""
         response = await self._client.chat.completions.create(
             model=self._model,
-            messages=[{"role": m.role.value, "content": m.content} for m in messages],
+            messages=cast(
+                list[ChatCompletionMessageParam],
+                [{"role": m.role.value, "content": m.content} for m in messages],
+            ),
             temperature=temperature,
         )
         usage = response.usage
@@ -36,5 +43,13 @@ class OpenAICompatibleClient:
             model=result.model,
             input_tokens=result.input_tokens,
             output_tokens=result.output_tokens,
+        )
+        response = await self._client.chat.completions.create(
+            model=self._model,
+            messages=cast(
+                list[ChatCompletionMessageParam],
+                [{"role": m.role.value, "content": m.content} for m in messages],
+            ),
+            temperature=temperature,
         )
         return result
