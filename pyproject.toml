@@ -4,8 +4,10 @@ version = "0.1.0"
 description = "Autonomous financial research agent"
 requires-python = ">=3.12"
 dependencies = [
+    "httpx>=0.28.1",
     "pydantic-settings>=2.14.2",
     "structlog>=26.1.0",
+    "tenacity>=9.1.4",
 ]
 
 [build-system]
