@@ -1,25 +1,24 @@
 """RAG nodes: index the latest 10-K and produce citation-grounded insights."""
 
-from financial_research_agent.agents.nodes import Node, NodeError, fault_isolated
+from financial_research_agent.agents.nodes import Node, fault_isolated
 from financial_research_agent.agents.schemas import (
     EvidenceRef,
     FilingAnalysis,
     GroundedInsight,
 )
-from financial_research_agent.agents.state import ResearchState
+from financial_research_agent.agents.state import NodeError, ResearchState
 from financial_research_agent.config import get_settings
 from financial_research_agent.llm.base import ChatMessage, LLMClient, Role
 from financial_research_agent.llm.structured import generate_structured
 from financial_research_agent.logging_config import get_logger
 from financial_research_agent.retrieval.bm25_index import BM25Index
 from financial_research_agent.retrieval.hybrid import HybridRetriever
-from financial_research_agent.retrieval.indexer import FilingIndexer
+from financial_research_agent.retrieval.indexer import FilingDownloader, FilingIndexer
 from financial_research_agent.retrieval.reranker import Reranker
 from financial_research_agent.retrieval.vector_store import (
     SearchResult,
     VectorStore,
 )
-from financial_research_agent.integrations.sec_edgar import SECEdgarClient
 
 log = get_logger(__name__)
 
@@ -32,7 +31,7 @@ _QUERIES = (
 _MAX_EVIDENCE = 8
 
 
-def make_index_filing(sec: SECEdgarClient, store: VectorStore) -> Node:
+def make_index_filing(sec: FilingDownloader, store: VectorStore) -> Node:
     """Node factory: index the most recent 10-K from state.filings."""
 
     async def index_filing(state: ResearchState) -> dict:
