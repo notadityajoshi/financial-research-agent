@@ -1,6 +1,6 @@
 """Cross-encoder reranking: precise relevance scoring of candidate chunks."""
 
-from typing import Protocol
+from typing import Protocol, cast
 
 from financial_research_agent.config import get_settings
 from financial_research_agent.logging_config import get_logger
@@ -29,7 +29,7 @@ class Reranker:
 
             model_name = get_settings().rerank_model
             log.info("reranker_loading", model=model_name)
-            self._model = CrossEncoder(model_name)
+            self._model = cast(ScoringModel, CrossEncoder(model_name))
         return self._model
 
     def rerank(
