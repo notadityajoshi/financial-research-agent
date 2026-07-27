@@ -5,7 +5,7 @@ import pytest
 
 from financial_research_agent import config
 from financial_research_agent.api.main import create_app
-from tests.test_api import FakeQueue, FakeService
+from tests.test_api import FakeService
 
 
 @pytest.fixture
@@ -44,9 +44,7 @@ async def test_health_open_without_key(raw_client) -> None:
 async def test_auth_disabled_when_no_keys(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("API_KEYS", "")
     config.get_settings.cache_clear()
-   transport = httpx.ASGITransport(
-        app=create_app(service=FakeService(tmp_path), queue=FakeQueue())
-    )
+    transport = httpx.ASGITransport(app=create_app(service=FakeService(tmp_path)))
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
         assert (await c.post("/runs", json={"ticker": "NVDA"})).status_code == 202
     config.get_settings.cache_clear()

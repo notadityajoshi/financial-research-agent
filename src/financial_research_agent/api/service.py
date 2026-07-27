@@ -4,8 +4,7 @@ import uuid
 from collections.abc import Callable
 from contextlib import AbstractAsyncContextManager
 from pathlib import Path
-from typing import Protocol
-from typing import Any, Protocol
+from typing import Any, Protocol, cast
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,7 +22,7 @@ SessionScope = Callable[[], AbstractAsyncContextManager[AsyncSession]]
 class GraphLike(Protocol):
     """Anything invokable like a compiled LangGraph graph."""
 
-    async def ainvoke(self, state: ResearchState) -> dict[str, Any]: ...
+    async def ainvoke(self, state: ResearchState) -> dict: ...
 
 
 class ResearchService:
@@ -31,11 +30,11 @@ class ResearchService:
 
     def __init__(
         self,
-        graph: GraphLike,
+        graph: Any,
         reports_dir: Path,
         session_scope: SessionScope = get_session,
     ) -> None:
-        self._graph = graph
+        self._graph = cast(GraphLike, graph)
         self._reports_dir = reports_dir
         self._session_scope = session_scope
 

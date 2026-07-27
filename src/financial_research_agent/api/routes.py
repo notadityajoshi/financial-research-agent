@@ -2,27 +2,28 @@
 
 import uuid
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse
+
+from financial_research_agent.api.auth import require_api_key
 from financial_research_agent.api.queue import JobQueue
+from financial_research_agent.api.rate_limit import enforce_rate_limit
 from financial_research_agent.api.schemas import RunCreateRequest, RunResponse
 from financial_research_agent.api.service import ResearchService
 from financial_research_agent.db.models import RunStatus
-from financial_research_agent.api.rate_limit import enforce_rate_limit
 
-from financial_research_agent.api.auth import require_api_key
 router = APIRouter()
 protected = APIRouter(dependencies=[Depends(require_api_key)])
 
-def get_queue(request: Request) -> JobQueue:
-    """Dependency: the app-wide job queue."""
-    queue = getattr(request.app.state, "queue", None)
-    if queue is None:
-        raise HTTPException(status_code=503, detail="job queue unavailable")
-    return queue
+
 def get_service(request: Request) -> ResearchService:
     """Dependency: the app-wide research service."""
     return request.app.state.service
+
+
+def get_queue(request: Request) -> JobQueue:
+    """Dependency: the app-wide job queue."""
+    return request.app.state.queue
 
 
 @router.get("/health")
@@ -45,15 +46,6 @@ async def create_run(
     """Create a run and enqueue it for background execution."""
     run = await service.create_run(body.ticker)
     await queue.enqueue(run.id, run.ticker)
-    return RunResponse.model_validate(run)
-async def create_run(
-    body: RunCreateRequest,
-    background_tasks: BackgroundTasks,
-    service: ResearchService = Depends(get_service),
-) -> RunResponse:
-    """Create a run and execute it in the background."""
-    run = await service.create_run(body.ticker)
-    background_tasks.add_task(service.execute, run.id, run.ticker)
     return RunResponse.model_validate(run)
 
 
@@ -86,5 +78,6 @@ async def get_report(
     return FileResponse(
         path, media_type="application/pdf", filename=f"{run.ticker}_report.pdf"
     )
+
 
 router.include_router(protected)
