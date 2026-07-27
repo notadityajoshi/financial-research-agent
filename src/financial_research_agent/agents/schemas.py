@@ -63,3 +63,11 @@ class GroundedInsight(BaseModel):
     detail: str
     severity: Severity
     evidence: list[EvidenceRef]
+
+class InvestmentSummary(BaseModel):
+    """Executive synthesis of all analysis streams."""
+
+    headline: str = Field(description="One-sentence overall assessment")
+    thesis: str = Field(description="Three to five sentence investment thesis")
+    strengths: list[str] = Field(description="Two to four key strengths")
+    concerns: list[str] = Field(description="Two to four key concerns")

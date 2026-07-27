@@ -10,7 +10,11 @@ from tests.test_graph import FakeFinancial, FakeNews, FakeSEC
 ITEMS = {
     "items": [
         {"title": "Concentration", "detail": "Very concentrated.", "severity": "high"}
-    ]
+    ],
+    "headline": "h",
+    "thesis": "t",
+    "strengths": [],
+    "concerns": [],
 }
 
 
@@ -35,7 +39,5 @@ def test_context_contains_precomputed_numbers() -> None:
 
     state = ResearchState(ticker="NVDA")
     state.facts = {"revenue": []}
-    state.metrics = compute_metrics(
-        {"revenue": []}
-    )
+    state.metrics = compute_metrics({"revenue": []})
     assert "Annual metrics" in build_context(state)

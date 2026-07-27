@@ -1,23 +1,13 @@
 """Offline graph tests: fake clients, no network, no LLM."""
 
+import json
+
 from financial_research_agent.agents.graph import build_research_graph
 from financial_research_agent.agents.state import ResearchState
 from financial_research_agent.integrations.financial_data import FinancialFact
 from financial_research_agent.integrations.news import NewsArticle
 from financial_research_agent.integrations.sec_edgar import Filing
-import json
-
 from financial_research_agent.llm.base import LLMResponse
-
-
-class _NoopLLM:
-    async def complete(self, messages, *, temperature: float = 0.0):
-        return LLMResponse(
-            content=json.dumps({"items": []}),
-            model="fake",
-            input_tokens=0,
-            output_tokens=0,
-        )
 
 FACT = FinancialFact(
     metric="revenue",
@@ -38,9 +28,27 @@ FILING = Filing(
 )
 ARTICLE = NewsArticle(title="Test", source="Wire", url="http://x", published="")
 
+_SUPERSET = {
+    "items": [],
+    "headline": "h",
+    "thesis": "t",
+    "strengths": [],
+    "concerns": [],
+}
+
+
+class _NoopLLM:
+    async def complete(self, messages, *, temperature: float = 0.0):
+        return LLMResponse(
+            content=json.dumps(_SUPERSET),
+            model="fake",
+            input_tokens=0,
+            output_tokens=0,
+        )
+
 
 class FakeSEC:
-    async def get_recent_filings(self, ticker: str, limit: int = 3) -> list[Filing]:
+    async def get_recent_filings(self, ticker: str, *, limit: int = 3) -> list[Filing]:
         return [FILING]
 
 
@@ -55,7 +63,9 @@ class FailingFinancial:
 
 
 class FakeNews:
-    async def get_company_news(self, company: str, limit: int = 8) -> list[NewsArticle]:
+    async def get_company_news(
+        self, company: str, *, limit: int = 8
+    ) -> list[NewsArticle]:
         return [ARTICLE]
 
 

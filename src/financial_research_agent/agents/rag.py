@@ -116,11 +116,7 @@ def make_filing_analyst(
                         evidence=refs,
                     )
                 )
-        log.info(
-            "filing_insights",
-            drafted=len(draft.items),
-            grounded=len(insights),
-        )
+        log.info("filing_insights", drafted=len(draft.items), grounded=len(insights))
         return {"filing_insights": insights}
 
     return fault_isolated("analyze_filing", analyze_filing)

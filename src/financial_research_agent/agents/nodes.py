@@ -5,9 +5,9 @@ from typing import Protocol
 
 from financial_research_agent.agents.state import NodeError, ResearchState
 from financial_research_agent.core.metrics import compute_metrics
-from financial_research_agent.integrations.financial_data import FinancialDataClient
-from financial_research_agent.integrations.news import NewsClient
-from financial_research_agent.integrations.sec_edgar import SECEdgarClient
+from financial_research_agent.integrations.financial_data import FinancialFact
+from financial_research_agent.integrations.news import NewsArticle
+from financial_research_agent.integrations.sec_edgar import Filing
 from financial_research_agent.logging_config import get_logger
 
 log = get_logger(__name__)
@@ -17,6 +17,28 @@ class Node(Protocol):
     """An async graph node: takes state, returns a partial state update."""
 
     def __call__(self, state: ResearchState) -> Awaitable[dict]: ...
+
+
+class FilingSource(Protocol):
+    """Anything that lists recent SEC filings."""
+
+    async def get_recent_filings(
+        self, ticker: str, *, limit: int = ...
+    ) -> list[Filing]: ...
+
+
+class FactsSource(Protocol):
+    """Anything that provides annual fundamentals."""
+
+    async def get_annual_facts(self, ticker: str) -> dict[str, list[FinancialFact]]: ...
+
+
+class NewsSource(Protocol):
+    """Anything that provides company news."""
+
+    async def get_company_news(
+        self, company: str, *, limit: int = ...
+    ) -> list[NewsArticle]: ...
 
 
 def fault_isolated(name: str, node: Node) -> Node:
@@ -35,7 +57,7 @@ def fault_isolated(name: str, node: Node) -> Node:
     return wrapper
 
 
-def make_fetch_filings(sec: SECEdgarClient) -> Node:
+def make_fetch_filings(sec: FilingSource) -> Node:
     """Node factory: list recent SEC filings for the ticker."""
 
     async def fetch_filings(state: ResearchState) -> dict:
@@ -45,7 +67,7 @@ def make_fetch_filings(sec: SECEdgarClient) -> Node:
     return fault_isolated("fetch_filings", fetch_filings)
 
 
-def make_fetch_facts(financial: FinancialDataClient) -> Node:
+def make_fetch_facts(financial: FactsSource) -> Node:
     """Node factory: load annual XBRL fundamentals."""
 
     async def fetch_facts(state: ResearchState) -> dict:
@@ -54,7 +76,7 @@ def make_fetch_facts(financial: FinancialDataClient) -> Node:
     return fault_isolated("fetch_facts", fetch_facts)
 
 
-def make_fetch_news(news: NewsClient) -> Node:
+def make_fetch_news(news: NewsSource) -> Node:
     """Node factory: load recent company news."""
 
     async def fetch_news(state: ResearchState) -> dict:
