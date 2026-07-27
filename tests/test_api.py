@@ -44,10 +44,19 @@ def fake(tmp_path: Path) -> FakeService:
 
 
 @pytest.fixture
-async def client(fake: FakeService):
+async def client(fake: FakeService, monkeypatch):
+    from financial_research_agent import config
+
+    monkeypatch.setenv("API_KEYS", "test-key")
+    config.get_settings.cache_clear()
     transport = httpx.ASGITransport(app=create_app(service=fake))
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
+    async with httpx.AsyncClient(
+        transport=transport,
+        base_url="http://test",
+        headers={"X-API-Key": "test-key"},
+    ) as c:
         yield c
+    config.get_settings.cache_clear()
 
 
 async def test_health(client) -> None:

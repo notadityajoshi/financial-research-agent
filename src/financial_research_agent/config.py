@@ -42,6 +42,13 @@ class Settings(BaseSettings):
     max_index_chunks: int = 120
     # Reports
     reports_dir: str = "data/reports"
+    # API auth (comma-separated keys; empty disables auth for local dev)
+    api_keys: str = ""
+
+    @property
+    def api_key_set(self) -> frozenset[str]:
+        """Parsed set of valid API keys."""
+        return frozenset(k.strip() for k in self.api_keys.split(",") if k.strip())
 @lru_cache
 def get_settings() -> Settings:
     """Return a cached Settings instance (loaded once per process)."""

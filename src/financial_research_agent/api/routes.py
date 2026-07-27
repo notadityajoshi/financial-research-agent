@@ -9,8 +9,11 @@ from financial_research_agent.api.schemas import RunCreateRequest, RunResponse
 from financial_research_agent.api.service import ResearchService
 from financial_research_agent.db.models import RunStatus
 
-router = APIRouter()
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 
+from financial_research_agent.api.auth import require_api_key
+router = APIRouter()
+protected = APIRouter(dependencies=[Depends(require_api_key)])
 
 def get_service(request: Request) -> ResearchService:
     """Dependency: the app-wide research service."""
@@ -23,7 +26,7 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@router.post("/runs", status_code=202, response_model=RunResponse)
+@protected.post("/runs", status_code=202, response_model=RunResponse)
 async def create_run(
     body: RunCreateRequest,
     background_tasks: BackgroundTasks,
@@ -35,7 +38,7 @@ async def create_run(
     return RunResponse.model_validate(run)
 
 
-@router.get("/runs/{run_id}", response_model=RunResponse)
+@protected.get("/runs/{run_id}", response_model=RunResponse)
 async def get_run(
     run_id: uuid.UUID, service: ResearchService = Depends(get_service)
 ) -> RunResponse:
@@ -46,7 +49,7 @@ async def get_run(
     return RunResponse.model_validate(run)
 
 
-@router.get("/runs/{run_id}/report")
+@protected.get("/runs/{run_id}/report")
 async def get_report(
     run_id: uuid.UUID, service: ResearchService = Depends(get_service)
 ) -> FileResponse:
@@ -64,3 +67,5 @@ async def get_report(
     return FileResponse(
         path, media_type="application/pdf", filename=f"{run.ticker}_report.pdf"
     )
+
+router.include_router(protected)

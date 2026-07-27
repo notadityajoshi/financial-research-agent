@@ -21,7 +21,7 @@ class FailingGraph:
     async def ainvoke(self, state: ResearchState) -> dict:
         raise RuntimeError("graph exploded")
 
-
+      
 @pytest.fixture
 async def session_scope():
     engine = create_async_engine("sqlite+aiosqlite:///:memory:")
