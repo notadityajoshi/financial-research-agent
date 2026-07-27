@@ -40,6 +40,8 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://localhost/finagent"
     # RAG
     max_index_chunks: int = 120
+    # Reports
+    reports_dir: str = "data/reports"
 @lru_cache
 def get_settings() -> Settings:
     """Return a cached Settings instance (loaded once per process)."""
