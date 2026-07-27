@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from fastapi import FastAPI
-
+from financial_research_agent.api.rate_limit import RateLimiter, build_limiter
 from financial_research_agent.api.routes import router
 from financial_research_agent.api.service import ResearchService
 from financial_research_agent.logging_config import configure_logging
@@ -43,10 +43,21 @@ def _build_default_service() -> ResearchService:
     return ResearchService(cast(GraphLike, graph), Path(settings.reports_dir))
 
 
-def create_app(service: ResearchService | None = None) -> FastAPI:
-    """Build the app; inject a service in tests, wire real one otherwise."""
+
+
+def create_app(
+    service: ResearchService | None = None,
+    limiter: RateLimiter | None = None,
+    *,
+    enable_rate_limit: bool = True,
+) -> FastAPI:
+    """Build the app; inject collaborators in tests, wire real ones otherwise."""
     configure_logging()
     app = FastAPI(title="Financial Research Agent", version="0.1.0")
     app.state.service = service if service is not None else _build_default_service()
+    if limiter is not None:
+        app.state.limiter = limiter
+    elif enable_rate_limit and service is None:
+        app.state.limiter = build_limiter()
     app.include_router(router)
     return app

@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     reports_dir: str = "data/reports"
     # API auth (comma-separated keys; empty disables auth for local dev)
     api_keys: str = ""
+    # Rate limiting
+    redis_url: str = "redis://localhost:6379/0"
+    rate_limit_per_minute: int = 5
 
     @property
     def api_key_set(self) -> frozenset[str]:

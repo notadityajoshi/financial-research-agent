@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse
 from financial_research_agent.api.schemas import RunCreateRequest, RunResponse
 from financial_research_agent.api.service import ResearchService
 from financial_research_agent.db.models import RunStatus
+from financial_research_agent.api.rate_limit import enforce_rate_limit
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 
@@ -26,7 +27,12 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@protected.post("/runs", status_code=202, response_model=RunResponse)
+@protected.post(
+    "/runs",
+    status_code=202,
+    response_model=RunResponse,
+    dependencies=[Depends(enforce_rate_limit)],
+)
 async def create_run(
     body: RunCreateRequest,
     background_tasks: BackgroundTasks,
