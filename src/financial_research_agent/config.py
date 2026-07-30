@@ -49,7 +49,15 @@ class Settings(BaseSettings):
     rate_limit_per_minute: int = 5
     # Frontend
     api_base_url: str = "http://localhost:8000"
-    
+    # Observability (Langfuse — empty disables tracing)
+    langfuse_public_key: str = ""
+    langfuse_secret_key: str = ""
+    langfuse_host: str = "https://cloud.langfuse.com"
+
+    @property
+    def tracing_enabled(self) -> bool:
+        """True only when both Langfuse keys are configured."""
+        return bool(self.langfuse_public_key and self.langfuse_secret_key)
     @property
     def api_key_set(self) -> frozenset[str]:
         """Parsed set of valid API keys."""
