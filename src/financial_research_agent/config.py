@@ -47,7 +47,9 @@ class Settings(BaseSettings):
     # Rate limiting
     redis_url: str = "redis://localhost:6379/0"
     rate_limit_per_minute: int = 5
-
+    # Frontend
+    api_base_url: str = "http://localhost:8000"
+    
     @property
     def api_key_set(self) -> frozenset[str]:
         """Parsed set of valid API keys."""
