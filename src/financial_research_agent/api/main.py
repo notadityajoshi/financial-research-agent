@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from fastapi import FastAPI
-
+from financial_research_agent.telemetry import instrument_fastapi, setup_telemetry
 from financial_research_agent.api.queue import ArqJobQueue, InlineJobQueue, JobQueue
 from financial_research_agent.api.rate_limit import RateLimiter, build_limiter
 from financial_research_agent.api.routes import router
@@ -68,8 +68,9 @@ def create_app(
 ) -> FastAPI:
     """Build the app; inject collaborators in tests, wire real ones otherwise."""
     configure_logging()
+    setup_telemetry("research-api")
     app = FastAPI(title="Financial Research Agent", version="0.1.0")
-
+    instrument_fastapi(app)
     injected = service is not None
     app.state.service = service if injected else _build_api_service()
 

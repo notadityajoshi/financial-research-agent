@@ -53,7 +53,10 @@ class Settings(BaseSettings):
     langfuse_public_key: str = ""
     langfuse_secret_key: str = ""
     langfuse_host: str = "https://cloud.langfuse.com"
-
+    # Tracing (OpenTelemetry)
+    otel_enabled: bool = False
+    otel_exporter: Literal["console", "otlp"] = "console"
+    otel_endpoint: str = "http://localhost:4317"
     @property
     def tracing_enabled(self) -> bool:
         """True only when both Langfuse keys are configured."""

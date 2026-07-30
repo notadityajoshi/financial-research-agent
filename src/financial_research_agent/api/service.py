@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Protocol, cast
 
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from financial_research_agent.telemetry import get_tracer
 from financial_research_agent.agents.state import ResearchState
 from financial_research_agent.db.engine import get_session
 from financial_research_agent.db.models import ResearchRun, RunStatus
@@ -68,7 +68,11 @@ class ResearchService:
         """Run the full pipeline for one run; never raises (records failure)."""
         await self._set_status(run_id, RunStatus.RUNNING)
         try:
-            raw = await self._graph.ainvoke(ResearchState(ticker=ticker))
+            tracer = get_tracer(__name__)
+            with tracer.start_as_current_span("research_graph") as span:
+                span.set_attribute("ticker", ticker)
+                span.set_attribute("run_id", str(run_id))
+                raw = await self._graph.ainvoke(ResearchState(ticker=ticker))
             state = ResearchState(**raw)
             path = self.report_path(run_id)
             path.parent.mkdir(parents=True, exist_ok=True)

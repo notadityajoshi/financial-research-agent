@@ -8,7 +8,7 @@ import uuid
 from typing import Any
 
 from arq.connections import RedisSettings
-
+from financial_research_agent.telemetry import setup_telemetry
 from financial_research_agent.api.main import build_default_service
 from financial_research_agent.config import get_settings
 from financial_research_agent.logging_config import configure_logging, get_logger
@@ -19,6 +19,7 @@ log = get_logger(__name__)
 async def startup(ctx: dict[str, Any]) -> None:
     """Build the expensive dependency graph once per worker process."""
     configure_logging()
+    setup_telemetry("research-worker")
     ctx["service"] = build_default_service()
     log.info("worker_started")
 
