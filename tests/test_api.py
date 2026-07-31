@@ -28,6 +28,9 @@ class FakeService(ResearchService):
             status=RunStatus.PENDING,
             error=None,
             created_at=datetime.now(UTC),
+            input_tokens=0,
+            output_tokens=0,
+            cost_usd=0.0,
         )
         self._runs[run.id] = run
         return run

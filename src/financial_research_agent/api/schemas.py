@@ -30,4 +30,7 @@ class RunResponse(BaseModel):
     ticker: str
     status: RunStatus
     error: str | None
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cost_usd: float = 0.0
     created_at: datetime
