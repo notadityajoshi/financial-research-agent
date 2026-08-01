@@ -78,6 +78,4 @@ async def get_report(
     return FileResponse(
         path, media_type="application/pdf", filename=f"{run.ticker}_report.pdf"
     )
-
-
 router.include_router(protected)

@@ -1,0 +1,122 @@
+name: financial-research-agent
+
+services:
+  init-data:
+    image: busybox
+    command: ["sh", "-c", "mkdir -p /data/reports /data/qdrant && chown -R 1000:1000 /data"]
+    volumes:
+      - app_data:/data
+    restart: "no"
+
+  postgres:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_USER: finagent
+      POSTGRES_PASSWORD: finagent
+      POSTGRES_DB: finagent
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finagent"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7-bookworm
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  ollama-pull:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["ollama pull llama3.2:3b && ollama pull nomic-embed-text"]
+    restart: "no"
+
+  migrate:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file: .env.docker
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+
+  api:
+    build: .
+    depends_on:
+      init-data:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      migrate:
+        condition: service_completed_successfully
+    env_file: .env.docker
+    ports:
+      - "8000:8000"
+    volumes:
+      - app_data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  worker:
+    build: .
+    depends_on:
+      init-data:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      ollama-pull:
+        condition: service_completed_successfully
+      migrate:
+        condition: service_completed_successfully
+    env_file: .env.docker
+    volumes:
+      - app_data:/data
+    command: ["arq", "financial_research_agent.worker.WorkerSettings"]
+    environment:
+      HF_HOME: /data/hf
+
+volumes:
+  postgres_data:
+  redis_data:
+  qdrant_data:
+  ollama_data:
+  app_data:

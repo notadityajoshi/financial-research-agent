@@ -34,6 +34,7 @@ class Settings(BaseSettings):
 
     # Vector store
     qdrant_path: str = "data/qdrant"
+    qdrant_url: str = ""
     # Reranking
     rerank_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     # Database

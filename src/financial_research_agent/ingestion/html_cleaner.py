@@ -5,7 +5,11 @@ import re
 from bs4 import BeautifulSoup
 
 from financial_research_agent.logging_config import get_logger
+import warnings
 
+from bs4 import XMLParsedAsHTMLWarning
+
+warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 log = get_logger(__name__)
 
 # Tags whose content is never useful prose.
