@@ -29,7 +29,9 @@ class ResearchRun(Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     ticker: Mapped[str] = mapped_column(String(10), index=True)
     status: Mapped[RunStatus] = mapped_column(
-        Enum(RunStatus, name="run_status", values_callable=lambda e: [m.value for m in e]),
+        Enum(
+            RunStatus, name="run_status", values_callable=lambda e: [m.value for m in e]
+        ),
         default=RunStatus.PENDING,
         index=True,
     )

@@ -1,5 +1,7 @@
 """OpenTelemetry setup: distributed tracing across API and worker."""
 
+from typing import TYPE_CHECKING
+
 from opentelemetry import trace
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
@@ -11,7 +13,6 @@ from opentelemetry.sdk.trace.export import (
 
 from financial_research_agent.config import get_settings
 from financial_research_agent.logging_config import get_logger
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -42,9 +43,7 @@ def setup_telemetry(service_name: str) -> None:
     if not settings.otel_enabled or _configured:
         return
 
-    provider = TracerProvider(
-        resource=Resource.create({"service.name": service_name})
-    )
+    provider = TracerProvider(resource=Resource.create({"service.name": service_name}))
     provider.add_span_processor(BatchSpanProcessor(_build_exporter()))
     trace.set_tracer_provider(provider)
     _configured = True

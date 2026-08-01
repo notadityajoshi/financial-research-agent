@@ -6,6 +6,7 @@ from typing import cast
 
 from fastapi import FastAPI
 
+from financial_research_agent.api.queue import ArqJobQueue, InlineJobQueue, JobQueue
 from financial_research_agent.api.rate_limit import RateLimiter, build_limiter
 from financial_research_agent.api.routes import router
 from financial_research_agent.api.service import GraphLike, ResearchService
@@ -50,6 +51,7 @@ def _build_default_service() -> ResearchService:
 def create_app(
     service: ResearchService | None = None,
     limiter: RateLimiter | None = None,
+    queue: JobQueue | None = None,
     *,
     enable_rate_limit: bool = True,
 ) -> FastAPI:
@@ -59,22 +61,26 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        if service is None:
-            from financial_research_agent.api.queue import ArqJobQueue
-            from financial_research_agent.config import get_settings
-
-            app.state.queue = ArqJobQueue(get_settings().redis_url)
-            log.info("arq_queue_attached")
         yield
 
-    app = FastAPI(
-        title="Financial Research Agent", version="0.1.0", lifespan=lifespan
-    )
+    app = FastAPI(title="Financial Research Agent", version="0.1.0", lifespan=lifespan)
     instrument_fastapi(app)
     app.state.service = service if service is not None else _build_default_service()
+
+    if queue is not None:
+        app.state.queue = queue
+    elif service is None:
+        from financial_research_agent.config import get_settings
+
+        app.state.queue = ArqJobQueue(get_settings().redis_url)
+        log.info("arq_queue_attached")
+    else:
+        app.state.queue = InlineJobQueue(app.state.service)
+
     if limiter is not None:
         app.state.limiter = limiter
     elif enable_rate_limit and service is None:
         app.state.limiter = build_limiter()
+
     app.include_router(router)
     return app

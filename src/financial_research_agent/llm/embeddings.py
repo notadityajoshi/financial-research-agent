@@ -27,9 +27,7 @@ class OpenAICompatibleEmbeddings:
 
     async def embed(self, texts: list[str]) -> list[list[float]]:
         """Embed a batch of texts; order preserved."""
-        response = await self._client.embeddings.create(
-            model=self._model, input=texts
-        )
+        response = await self._client.embeddings.create(model=self._model, input=texts)
         vectors = [item.embedding for item in response.data]
         log.info("embeddings_created", count=len(vectors), model=self._model)
         return vectors

@@ -24,7 +24,9 @@ def _full_state() -> ResearchState:
             detail="Detail.",
             severity="medium",
             evidence=[
-                EvidenceRef(excerpt="Excerpt", form_type="10-K", filing_date="2026-01-01")
+                EvidenceRef(
+                    excerpt="Excerpt", form_type="10-K", filing_date="2026-01-01"
+                )
             ],
         )
     ]
@@ -45,6 +47,8 @@ def test_empty_state_still_renders() -> None:
 def test_unicode_does_not_crash() -> None:
     state = ResearchState(ticker="NVDA")
     state.risks = [
-        AnalysisItem(title="Em—dash 'quotes' €", detail="More — unicode.", severity="low")
+        AnalysisItem(
+            title="Em—dash 'quotes' €", detail="More — unicode.", severity="low"
+        )
     ]
     assert render_pdf(state).startswith(b"%PDF")

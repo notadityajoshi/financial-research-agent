@@ -31,9 +31,7 @@ def _chunk(index: int, text: str) -> Chunk:
 
 @pytest.fixture
 async def store() -> VectorStore:
-    s = VectorStore(
-        AsyncQdrantClient(location=":memory:"), FakeEmbedder(), dim=DIM
-    )
+    s = VectorStore(AsyncQdrantClient(location=":memory:"), FakeEmbedder(), dim=DIM)
     await s.index_chunks(
         [
             _chunk(0, "Revenue revenue revenue increased this year."),
@@ -56,6 +54,8 @@ async def test_metadata_preserved(store: VectorStore) -> None:
 
 
 async def test_idempotent_reindex(store: VectorStore) -> None:
-    await store.index_chunks([_chunk(0, "Revenue revenue revenue increased this year.")])
+    await store.index_chunks(
+        [_chunk(0, "Revenue revenue revenue increased this year.")]
+    )
     results = await store.search("revenue", limit=10)
     assert len(results) == 3  # overwrite, not duplicate

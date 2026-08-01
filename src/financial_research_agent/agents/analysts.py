@@ -2,6 +2,7 @@
 
 from financial_research_agent.agents.nodes import Node, fault_isolated
 from financial_research_agent.agents.schemas import (
+    AnalysisItem,
     OpportunityAnalysis,
     RiskAnalysis,
 )
@@ -20,7 +21,8 @@ def build_context(state: ResearchState) -> str:
     if state.metrics:
         for m in state.metrics.annual:
             lines.append(
-                f"- FY{m.fiscal_year}: revenue {_fmt(m.revenue and m.revenue / 1e9, 'B USD')}, "
+                f"- FY{m.fiscal_year}: "
+                f"revenue {_fmt(m.revenue and m.revenue / 1e9, 'B USD')}, "
                 f"rev growth {_fmt(m.revenue_growth_pct, '%')}, "
                 f"net margin {_fmt(m.net_margin_pct, '%')}, "
                 f"ROE {_fmt(m.roe_pct, '%')}, "
@@ -35,15 +37,22 @@ def build_context(state: ResearchState) -> str:
 
 
 def _analyst_node(
-    llm: LLMClient, *, name: str, role_prompt: str, schema: type
+    llm: LLMClient,
+    *,
+    name: str,
+    role_prompt: str,
+    schema: type[RiskAnalysis] | type[OpportunityAnalysis],
 ) -> Node:
     async def analyze(state: ResearchState) -> dict:
         messages = [
             ChatMessage(role=Role.SYSTEM, content=role_prompt),
             ChatMessage(role=Role.USER, content=build_context(state)),
         ]
-        analysis = await generate_structured(llm, messages, schema)
-        return {name: analysis.items}
+        analysis: RiskAnalysis | OpportunityAnalysis = await generate_structured(
+            llm, messages, schema
+        )
+        items: list[AnalysisItem] = analysis.items
+        return {name: items}
 
     return fault_isolated(f"analyze_{name}", analyze)
 

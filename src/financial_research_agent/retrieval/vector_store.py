@@ -99,9 +99,7 @@ class VectorStore:
             SearchResult(
                 text=str(point.payload.get("text", "")),
                 score=point.score,
-                metadata={
-                    k: str(v) for k, v in point.payload.items() if k != "text"
-                },
+                metadata={k: str(v) for k, v in point.payload.items() if k != "text"},
             )
             for point in response.points
             if point.payload

@@ -38,9 +38,7 @@ def make_index_filing(sec: FilingDownloader, store: VectorStore) -> Node:
         filing = next((f for f in state.filings if f.form_type == "10-K"), None)
         if filing is None:
             return {
-                "errors": [
-                    NodeError(node="index_filing", message="no 10-K in filings")
-                ]
+                "errors": [NodeError(node="index_filing", message="no 10-K in filings")]
             }
         await FilingIndexer(sec, store).index_filing(
             state.ticker, filing, max_chunks=get_settings().max_index_chunks

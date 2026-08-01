@@ -38,9 +38,7 @@ class ArqJobQueue:
     async def enqueue(self, run_id: uuid.UUID, ticker: str) -> None:
         """Enqueue one run; _job_id makes re-enqueueing the same run a no-op."""
         pool = await self._get_pool()
-        await pool.enqueue_job(
-            "run_research", str(run_id), ticker, _job_id=str(run_id)
-        )
+        await pool.enqueue_job("run_research", str(run_id), ticker, _job_id=str(run_id))
         log.info("job_enqueued", run_id=str(run_id), ticker=ticker)
 
 

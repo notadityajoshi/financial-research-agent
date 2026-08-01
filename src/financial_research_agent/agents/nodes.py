@@ -50,7 +50,7 @@ def fault_isolated(name: str, node: Node) -> Node:
             result = await node(state)
             log.info("node_done", node=name)
             return result
-        except Exception as exc:  # noqa: BLE001 — isolation boundary by design
+        except Exception as exc:
             log.error("node_failed", node=name, error=str(exc))
             return {"errors": [NodeError(node=name, message=str(exc))]}
 

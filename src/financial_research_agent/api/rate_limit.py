@@ -40,7 +40,7 @@ class RateLimiter:
                 pipe.incr(key)
                 pipe.expire(key, _WINDOW_SECONDS * 2)
                 count, _ = await pipe.execute()
-        except Exception as exc:  # noqa: BLE001 — availability over strictness
+        except Exception as exc:
             log.warning("rate_limit_unavailable", error=str(exc))
             return True
         allowed = int(count) <= self._limit

@@ -26,7 +26,7 @@ def _extract_json(text: str) -> str:
     return cleaned[start : end + 1]
 
 
-async def generate_structured(
+async def generate_structured[T: BaseModel](
     llm: LLMClient,
     messages: list[ChatMessage],
     model_cls: type[T],

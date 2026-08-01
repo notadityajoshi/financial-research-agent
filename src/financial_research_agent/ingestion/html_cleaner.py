@@ -1,13 +1,11 @@
 """Convert SEC filing HTML into clean plain text for chunking and RAG."""
 
 import re
-
-from bs4 import BeautifulSoup
-
-from financial_research_agent.logging_config import get_logger
 import warnings
 
-from bs4 import XMLParsedAsHTMLWarning
+from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
+
+from financial_research_agent.logging_config import get_logger
 
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 log = get_logger(__name__)

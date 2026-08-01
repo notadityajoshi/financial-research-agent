@@ -57,7 +57,13 @@ def render_pdf(state: ResearchState) -> bytes:
     pdf.add_page()
 
     pdf.set_font("helvetica", "B", 20)
-    pdf.cell(0, 12, _latin1(f"{state.ticker} — Research Report"), new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(
+        0,
+        12,
+        _latin1(f"{state.ticker} — Research Report"),
+        new_x="LMARGIN",
+        new_y="NEXT",
+    )
     pdf.set_font("helvetica", "", 9)
     pdf.set_text_color(100)
     pdf.cell(
@@ -92,7 +98,10 @@ def render_pdf(state: ResearchState) -> bytes:
             pdf.body(row, size=9)
         pdf.body(f"Revenue CAGR: {_fmt(state.metrics.revenue_cagr_pct, '%')}", size=9)
 
-    for title, items in (("Risks", state.risks), ("Opportunities", state.opportunities)):
+    for title, items in (
+        ("Risks", state.risks),
+        ("Opportunities", state.opportunities),
+    ):
         if items:
             pdf.section(title)
             for item in items:

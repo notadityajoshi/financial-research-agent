@@ -5,6 +5,7 @@ from financial_research_agent.llm.base import LLMClient
 from financial_research_agent.llm.openai_compatible import OpenAICompatibleClient
 from financial_research_agent.llm.tracing import maybe_wrap_with_tracing
 
+
 def create_llm_client() -> LLMClient:
     """Return the LLM client selected by Settings (fail fast if misconfigured)."""
     settings = get_settings()

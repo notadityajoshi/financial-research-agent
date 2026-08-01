@@ -28,9 +28,7 @@ class FakeLangfuse:
 
 class FakeLLM:
     async def complete(self, messages, *, temperature: float = 0.0) -> LLMResponse:
-        return LLMResponse(
-            content="hi", model="fake", input_tokens=3, output_tokens=1
-        )
+        return LLMResponse(content="hi", model="fake", input_tokens=3, output_tokens=1)
 
 
 class BoomLLM:

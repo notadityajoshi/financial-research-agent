@@ -104,6 +104,4 @@ def compute_metrics(facts: dict[str, list[FinancialFact]]) -> MetricsSummary:
         )
         previous = row
 
-    return MetricsSummary(
-        annual=annual, revenue_cagr_pct=compute_revenue_cagr(annual)
-    )
+    return MetricsSummary(annual=annual, revenue_cagr_pct=compute_revenue_cagr(annual))

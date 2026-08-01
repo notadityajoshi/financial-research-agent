@@ -25,7 +25,10 @@ SessionScope = Callable[[], AbstractAsyncContextManager[AsyncSession]]
 class GraphLike(Protocol):
     """Anything invokable like a compiled LangGraph graph."""
 
-    async def ainvoke(self, state: ResearchState, *args: object, **kwargs: object) -> dict: ...
+    async def ainvoke(
+        self, state: ResearchState, *args: object, **kwargs: object
+    ) -> dict: ...
+
 
 class JobQueue(Protocol):
     """Anything that can enqueue the research job (arq pool or a fake)."""
@@ -109,6 +112,6 @@ class ResearchService:
                 await self._persist_cost(run_id, self._cost_source.total)
             await self._set_status(run_id, RunStatus.COMPLETED)
             log.info("run_completed", run_id=str(run_id))
-        except Exception as exc:  # noqa: BLE001 — service boundary
+        except Exception as exc:
             await self._set_status(run_id, RunStatus.FAILED, error=str(exc))
             log.error("run_failed", run_id=str(run_id), error=str(exc))

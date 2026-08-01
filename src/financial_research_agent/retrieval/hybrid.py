@@ -2,8 +2,9 @@
 
 from financial_research_agent.logging_config import get_logger
 from financial_research_agent.retrieval.bm25_index import BM25Index
-from financial_research_agent.retrieval.vector_store import SearchResult, VectorStore
 from financial_research_agent.retrieval.reranker import Reranker
+from financial_research_agent.retrieval.vector_store import SearchResult, VectorStore
+
 log = get_logger(__name__)
 
 RRF_K = 60  # standard damping constant from the RRF paper
@@ -23,9 +24,7 @@ class HybridRetriever:
         self._reranker = reranker
 
     @staticmethod
-    def _fuse(
-        ranked_lists: list[list[SearchResult]], limit: int
-    ) -> list[SearchResult]:
+    def _fuse(ranked_lists: list[list[SearchResult]], limit: int) -> list[SearchResult]:
         """RRF: score(doc) = sum over lists of 1 / (K + rank)."""
         scores: dict[str, float] = {}
         by_text: dict[str, SearchResult] = {}
@@ -37,9 +36,7 @@ class HybridRetriever:
                 by_text.setdefault(result.text, result)
         top = sorted(scores, key=lambda t: scores[t], reverse=True)[:limit]
         return [
-            SearchResult(
-                text=text, score=scores[text], metadata=by_text[text].metadata
-            )
+            SearchResult(text=text, score=scores[text], metadata=by_text[text].metadata)
             for text in top
         ]
 

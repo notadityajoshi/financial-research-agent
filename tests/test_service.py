@@ -1,4 +1,3 @@
-
 """Service lifecycle tests: in-memory SQLite, fake graph, tmp reports dir."""
 
 from contextlib import asynccontextmanager
@@ -21,7 +20,7 @@ class FailingGraph:
     async def ainvoke(self, state: ResearchState) -> dict:
         raise RuntimeError("graph exploded")
 
-      
+
 @pytest.fixture
 async def session_scope():
     engine = create_async_engine("sqlite+aiosqlite:///:memory:")
@@ -50,6 +49,7 @@ async def test_execute_success(session_scope, tmp_path: Path) -> None:
     loaded = await service.get_run(run.id)
     assert loaded is not None
     assert loaded.status is RunStatus.COMPLETED
+
 
 async def test_execute_failure_recorded(session_scope, tmp_path: Path) -> None:
     service = ResearchService(FailingGraph(), tmp_path, session_scope)

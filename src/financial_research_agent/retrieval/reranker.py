@@ -38,9 +38,7 @@ class Reranker:
         """Return top `limit` candidates by cross-encoder relevance."""
         if not candidates:
             return []
-        scores = self._get_model().predict(
-            [(query, c.text) for c in candidates]
-        )
+        scores = self._get_model().predict([(query, c.text) for c in candidates])
         rescored = sorted(
             (
                 SearchResult(text=c.text, score=float(s), metadata=c.metadata)
@@ -49,5 +47,7 @@ class Reranker:
             key=lambda r: r.score,
             reverse=True,
         )[:limit]
-        log.info("reranked", query=query[:60], candidates=len(candidates), kept=len(rescored))
+        log.info(
+            "reranked", query=query[:60], candidates=len(candidates), kept=len(rescored)
+        )
         return rescored

@@ -1,6 +1,5 @@
 """LLM client for any OpenAI-compatible API (Ollama, OpenAI)."""
 
-from openai import AsyncOpenAI
 from typing import cast
 
 from openai import AsyncOpenAI

@@ -58,14 +58,18 @@ class Settings(BaseSettings):
     otel_enabled: bool = False
     otel_exporter: Literal["console", "otlp"] = "console"
     otel_endpoint: str = "http://localhost:4317"
+
     @property
     def tracing_enabled(self) -> bool:
         """True only when both Langfuse keys are configured."""
         return bool(self.langfuse_public_key and self.langfuse_secret_key)
+
     @property
     def api_key_set(self) -> frozenset[str]:
         """Parsed set of valid API keys."""
         return frozenset(k.strip() for k in self.api_keys.split(",") if k.strip())
+
+
 @lru_cache
 def get_settings() -> Settings:
     """Return a cached Settings instance (loaded once per process)."""

@@ -21,8 +21,10 @@ st.title("Autonomous Financial Research Agent")
 st.caption("SEC filings · deterministic metrics · cited RAG insights · PDF report")
 
 if not client.health():
-    st.error("API is unreachable. Start it: `uv run uvicorn --factory "
-             "financial_research_agent.api.main:create_app --port 8000`")
+    st.error(
+        "API is unreachable. Start it: `uv run uvicorn --factory "
+        "financial_research_agent.api.main:create_app --port 8000`"
+    )
     st.stop()
 
 ticker = st.text_input("Ticker", value="NVDA", max_chars=10)
@@ -31,7 +33,7 @@ if st.button("Analyze", type="primary", disabled=not ticker.strip()):
     try:
         run = client.create_run(ticker.strip())
         st.session_state["run_id"] = run.id
-    except Exception as exc:  # noqa: BLE001 — surface API errors to the user
+    except Exception as exc:
         st.error(f"Could not start run: {exc}")
 
 run_id = st.session_state.get("run_id")

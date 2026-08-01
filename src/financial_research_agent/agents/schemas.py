@@ -64,6 +64,7 @@ class GroundedInsight(BaseModel):
     severity: Severity
     evidence: list[EvidenceRef]
 
+
 class InvestmentSummary(BaseModel):
     """Executive synthesis of all analysis streams."""
 

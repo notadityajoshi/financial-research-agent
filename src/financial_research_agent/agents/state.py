@@ -5,17 +5,16 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field
 
-from financial_research_agent.core.metrics import MetricsSummary
-from financial_research_agent.integrations.financial_data import FinancialFact
-from financial_research_agent.integrations.news import NewsArticle
-from financial_research_agent.integrations.sec_edgar import Filing
-from financial_research_agent.agents.schemas import AnalysisItem
-from financial_research_agent.agents.schemas import AnalysisItem, GroundedInsight
 from financial_research_agent.agents.schemas import (
     AnalysisItem,
     GroundedInsight,
     InvestmentSummary,
 )
+from financial_research_agent.core.metrics import MetricsSummary
+from financial_research_agent.integrations.financial_data import FinancialFact
+from financial_research_agent.integrations.news import NewsArticle
+from financial_research_agent.integrations.sec_edgar import Filing
+
 
 class NodeError(BaseModel):
     """A failure in one node, recorded instead of crashing the graph."""

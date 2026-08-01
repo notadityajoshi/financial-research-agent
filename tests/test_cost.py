@@ -1,6 +1,6 @@
 """Offline cost tests: pure calculation + accumulating decorator."""
 
-from financial_research_agent.core.cost import CostBreakdown, compute_cost
+from financial_research_agent.core.cost import compute_cost
 from financial_research_agent.llm.base import ChatMessage, LLMResponse, Role
 from financial_research_agent.llm.cost_tracking import CostTrackingLLMClient
 

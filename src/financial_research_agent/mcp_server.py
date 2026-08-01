@@ -20,7 +20,7 @@ class RunAPI(Protocol):
 
     async def post(self, url: str, *, json: dict) -> httpx.Response: ...
     async def get(self, url: str) -> httpx.Response: ...
-    
+
 
 class FactsAPI(Protocol):
     """Anything that provides annual fundamentals."""

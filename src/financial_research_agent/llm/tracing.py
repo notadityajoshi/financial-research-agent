@@ -75,6 +75,6 @@ def maybe_wrap_with_tracing(client: LLMClient) -> LLMClient:
         )
         log.info("tracing_enabled", host=settings.langfuse_host)
         return TracingLLMClient(client, langfuse)  # type: ignore[arg-type]
-    except Exception as exc:  # noqa: BLE001 — never fail the app for observability
+    except Exception as exc:
         log.warning("tracing_setup_failed", error=str(exc))
         return client
