@@ -3,3 +3,8 @@
 - Health check: probe telling if a service is ready
 - depends_on: startup ordering between services
 - Volume: persistent storage outside a container
+- Compose: runs multi-container apps from one file
+- Service: one container definition in Compose
+- Health check: probe telling if a service is ready
+- depends_on: startup ordering between services
+- Volume: persistent storage outside a container
