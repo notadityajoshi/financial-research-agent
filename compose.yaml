@@ -46,6 +46,8 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+    ports:
+      - "11434:11434" 
 
   ollama-pull:
     image: ollama/ollama:latest
@@ -57,6 +59,7 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command: ["ollama pull llama3.2:3b && ollama pull nomic-embed-text"]
     restart: "no"
+    
 
   migrate:
     build: .

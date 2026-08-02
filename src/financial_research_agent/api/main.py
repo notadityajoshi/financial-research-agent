@@ -43,7 +43,7 @@ def _build_default_service() -> ResearchService:
         NewsClient(),
         create_llm_client(),
         store,
-        Reranker(),
+        Reranker() if settings.rerank_enabled else None,
     )
     return ResearchService(cast(GraphLike, graph), Path(settings.reports_dir))
 

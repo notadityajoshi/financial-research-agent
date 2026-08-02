@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     qdrant_url: str = ""
     # Reranking
     rerank_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    rerank_enabled: bool = True
     # Database
     database_url: str = "postgresql+asyncpg://localhost/finagent"
     # RAG
