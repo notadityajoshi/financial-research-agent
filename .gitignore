@@ -9,4 +9,8 @@ data/
 .ruff_cache/
 *.egg-info/
 .coverage
-htmlcov/
+htmlcov/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+crash.log
